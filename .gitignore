@@ -1,0 +1,12 @@
+/pinner_backend/node_modules/
+
+# Dependency directories
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# dotenv environment variables file
+.env
+.env.test
+.env.production
