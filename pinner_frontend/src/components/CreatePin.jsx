@@ -1,7 +1,5 @@
 import React from "react";
 
-const CreatePin = () => {
-  return <div>CreatePin</div>;
-};
+const CreatePin = () => <div>CreatePin</div>;
 
 export default CreatePin;
