@@ -7,12 +7,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import { MdDownloadForOffline } from "react-icons/md";
 import { AiTwotoneDelete } from "react-icons/ai";
-import { BsFillArrowUpRIghtCircleFill } from "react-icons/bs";
+import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 
 import { fetchUser } from "../utils/fetchUser";
 import { client, urlFor } from "../client";
 
-const Pin = ({ pin: { image, _id, save } }) => {
+const Pin = ({ pin: { image, _id, save, destination, postedBy } }) => {
   const [postHovered, setPostHovered] = useState(false);
 
   const navigate = useNavigate();
@@ -42,6 +42,12 @@ const Pin = ({ pin: { image, _id, save } }) => {
           window.location.reload();
         });
     }
+  };
+
+  const deletePin = (id) => {
+    client.delete(id).then(() => {
+      window.location.reload();
+    });
   };
 
   return (
@@ -89,9 +95,36 @@ const Pin = ({ pin: { image, _id, save } }) => {
                     savePin(_id);
                   }}
                   type="button"
-                  className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 rounded-3xl hover:shadow-md outlined"
+                  className="bg-red-500 opacity-70 hover:opacity-100 text-white font-bold px-5 py-1 text-base rounded-3xl hover:shadow-md outlined"
                 >
                   Save
+                </button>
+              )}
+            </div>
+            <div className="flex justify-between items-center gap-2 w-full">
+              {destination && (
+                <a
+                  href={destination}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white flex items-center gap-2 text-black font-bold p-2 pl-4 pr-4 rounded-full opacity-70 hover:opacity-100 hover:shadow-md"
+                >
+                  <BsFillArrowUpRightCircleFill />
+                  {destination.length > 20
+                    ? destination.slice(8, 20)
+                    : destination.slice(8)}
+                </a>
+              )}
+              {postedBy?._id === user.googleId && (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    deletePin(_id);
+                  }}
+                  className="bg-white p-2 opacity-70 hover:opacity-100 font-bold text-dark text-base rounded-3xl hover:shadow-md outlined"
+                >
+                  <AiTwotoneDelete />
                 </button>
               )}
             </div>
