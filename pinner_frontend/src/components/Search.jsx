@@ -1,5 +1,42 @@
-import React from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect } from "react";
 
-const Search = () => <div>Search</div>;
+import MasonryLayout from "./MasonryLayout";
+import Spinner from "./Spinner";
+
+import { client } from "../client";
+import { feedQuery, searchQuery } from "../utils/data";
+
+const Search = ({ searchTerm }) => {
+  const [pins, setPins] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (searchTerm) {
+      setLoading(true);
+      const query = searchQuery(searchTerm.toLowerCase());
+
+      client.fetch(query).then((data) => {
+        setPins(data);
+        setLoading(false);
+      });
+    } else {
+      client.fetch(feedQuery).then((data) => {
+        setPins(data);
+        setLoading(false);
+      });
+    }
+  }, [searchTerm]);
+
+  return (
+    <div>
+      {loading && <Spinner message="Searching for Pins" />}
+      {pins?.length !== 0 && <MasonryLayout pins={pins} />}
+      {pins?.length === 0 && searchTerm !== "" && !loading && (
+        <div className="mt-10 text-center text-xl">No Pins found!</div>
+      )}
+    </div>
+  );
+};
 
 export default Search;
