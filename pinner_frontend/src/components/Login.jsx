@@ -1,7 +1,10 @@
-import React from "react";
-import GoogleLogin from "react-google-login";
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/control-has-associated-label */
+import React, { useEffect } from "react";
+
+import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
+
 import { client } from "../client";
 
 import pinnerVideo from "../assets/pinner.mp4";
@@ -10,21 +13,37 @@ import logo from "../assets/logowhite.png";
 const Login = () => {
   const navigate = useNavigate();
 
-  const responseGoogle = (response) => {
-    localStorage.setItem("user", JSON.stringify(response.profileObj));
-    const { name, googleId, imageUrl } = response.profileObj;
+  const handleCallbackResponse = (response) => {
+    localStorage.setItem(
+      "user",
+      JSON.stringify(jwtDecode(response.credential))
+    );
+    const { name, sub, picture } = jwtDecode(response.credential);
 
     const doc = {
-      _id: googleId,
+      _id: sub,
       _type: "user",
       userName: name,
-      image: imageUrl,
+      image: picture,
     };
 
     client.createIfNotExists(doc).then(() => {
       navigate("/", { replace: true });
     });
   };
+
+  useEffect(() => {
+    /* global google */
+    google.accounts.id.initialize({
+      client_id: process.env.REACT_APP_GOOGLE_API_TOKEN,
+      callback: handleCallbackResponse,
+    });
+
+    google.accounts.id.renderButton(document.getElementById("signInBtn"), {
+      theme: "outline",
+      shape: "circle",
+    });
+  }, []);
 
   return (
     <div className="flex justify-start items-center flex-col h-screen">
@@ -43,21 +62,12 @@ const Login = () => {
             <img src={logo} alt="Pinner Logo" width="130px" />
           </div>
           <div className="shadow-2xl">
-            <GoogleLogin
-              clientId={process.env.REACT_APP_GOOGLE_API_TOKEN}
-              render={(renderProps) => (
-                <button
-                  type="button"
-                  className="bg-mainColor flex justify-center items-center p-3 rounded-lg cursor-pointer outline-none"
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                >
-                  <FcGoogle className="mr-4" /> Sign in with Google
-                </button>
-              )}
-              onSuccess={responseGoogle}
-              onFailure={responseGoogle}
-              cookiePolicy="single_host_origin"
+            <div
+              id="signInBtn"
+              role="button"
+              tabIndex="0"
+              onClick={handleCallbackResponse}
+              className="w-100 h-30"
             />
           </div>
         </div>
